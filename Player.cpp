@@ -12,17 +12,17 @@ GLfloat player_vertices[] = {
 };
 
 GLfloat player_hitbox_vertices[] = {
-	1.0f, 1.0f, 0.0f, /**/ 1.0f, 0.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f, //0
 	0.0f, 1.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f,
-	0.0f, 1.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f,
-	0.0f, 0.0f, 0.0f, /**/ 1.0f, 0.0f, 1.0f, 1.0f,
-	0.0f, 0.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f,
-	1.0f, 0.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f,
-	1.0f, 0.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 0.0f, /**/ 0.0f, 1.0f, 1.0f, 1.0f
+	0.0f, 1.0f, 0.0f, /**/ 0.0f, 0.0f, 0.0f, 1.0f, //2
+	0.0f, 0.0f, 0.0f, /**/ 0.0f, 0.0f, 0.0f, 1.0f,
+	0.0f, 0.0f, 0.0f, /**/ 0.0f, 0.0f, 1.0f, 1.0f, //4
+	1.0f, 0.0f, 0.0f, /**/ 0.0f, 0.0f, 1.0f, 1.0f,
+	1.0f, 0.0f, 0.0f, /**/ 1.0f, 0.0f, 0.0f, 1.0f, //6
+	1.0f, 1.0f, 0.0f, /**/ 1.0f, 0.0f, 0.0f, 1.0f
 };
 
-glm::vec3 player_position = glm::vec3(0.3f, -6.0f, 0.0f);
+glm::vec3 player_position = glm::vec3(0.0f,  4.9f, 0.0f);
 
 GLuint texture;
 GLfloat player_delta_time = 0.0f;
@@ -39,6 +39,8 @@ Player::~Player()
 }
 
 Collision collision;
+bool changed_position_after_fall = false;
+
 
 void Player::PlayerAir(GLfloat total_delta_time)
 {
@@ -52,20 +54,16 @@ void Player::PlayerAir(GLfloat total_delta_time)
 		//GLfloat player_min_max_x_y[] = { 0.0f + player_position[0], 1.0f + player_position[0], 0.0f + player_position[1], 1.0f + player_position[1] };
 		//bool player_on_ground = collision.DetectCollision(player_min_max_x_y);
 		//std::cout << is_player_falling << std::endl;
-
 		bool player_on_ground = collision.DetectCollision(player_hitbox_vertices, player_position);
 
-		if (player_on_ground)
+		if (player_on_ground == true)
 		{
 			is_player_falling = false;
 		}
 		else
 		{
-			//player_position[0] = mouse_x_position;
-			//player_position[1] = mouse_y_position;
-			//player_position = { -1.0f, -0.0f, 0.0f };
 			//player_position[0] += 0.05f;
-			player_position[1] += 0.05f;
+			player_position[1] -= 0.05f;
 
 		}
 
@@ -87,12 +85,12 @@ void Player::DrawPlayer(bool loadedInitial, Shader ourShader)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		int width, height;
-		unsigned char* image = SOIL_load_image("images/player/test-player.png", &width, &height, 0, SOIL_LOAD_RGBA); 
+		unsigned char* image = SOIL_load_image("images/player/test-player.png", &width, &height, 0, SOIL_LOAD_RGBA);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		SOIL_free_image_data(image);
 		glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture when done, so we won't accidentily mess up our texture.	
-	
+
 
 		glGenVertexArrays(1, &VAO_p);
 		glGenBuffers(1, &VBO_p);
@@ -125,6 +123,7 @@ void Player::DrawPlayer(bool loadedInitial, Shader ourShader)
 		glEnableVertexAttribArray(1);
 
 		glBindVertexArray(0); // Unbind VAO	
+
 	}
 
 	glm::mat4 model;
@@ -139,14 +138,13 @@ void Player::DrawPlayer(bool loadedInitial, Shader ourShader)
 	glDrawArrays(GL_LINES, 0, 8);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	glBindVertexArray(VAO_p);		
+	glBindVertexArray(VAO_p);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glUniform1i(glGetUniformLocation(ourShader.Program, "ourTexture1"), 0);	
+	glUniform1i(glGetUniformLocation(ourShader.Program, "ourTexture1"), 0);
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindVertexArray(0);
-
 }
