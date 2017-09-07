@@ -39,7 +39,7 @@ int MainGame::run()
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "LearnOpenGL", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Mr Redman", nullptr, nullptr);
 
 	if (window == nullptr)
 	{
@@ -92,7 +92,7 @@ int MainGame::run()
 			}
 
 			// Set the required callback functions
-			keyPress.keyCallback(window);
+			keyPress.KeyCallback(window);
 
 			render.calculateGlobalDelta();
 			total_delta_time += globalDeltaTime;

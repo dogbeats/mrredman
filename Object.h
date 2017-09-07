@@ -26,6 +26,8 @@ extern std::vector<std::string> texture_name;
 extern std::vector<GLfloat> object_scale;
 extern std::vector<int> number_of_hitbox_lines;
 
+extern std::vector<int> object_hitbox_length;
+
 class Object
 {
 public:

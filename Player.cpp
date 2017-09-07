@@ -22,10 +22,12 @@ GLfloat player_hitbox_vertices[] = {
 	1.0f, 1.0f, 0.0f, /**/ 1.0f, 0.0f, 0.0f, 1.0f
 };
 
-glm::vec3 player_position = glm::vec3(0.0f,  4.9f, 0.0f);
+glm::vec3 player_position = glm::vec3(2.5f,  8.0f, 0.0f);
 
 GLuint texture;
 GLfloat player_delta_time = 0.0f;
+
+bool player_jump = false;
 
 //void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
@@ -39,36 +41,145 @@ Player::~Player()
 }
 
 Collision collision;
-bool changed_position_after_fall = false;
-
+GLfloat *player_on_ground;
+GLfloat player_collision_line_data[3] = { 0, 0, 1 };
+bool is_player_falling = true; //to be moved and determined in game - set as true for collision testing purposes
+GLfloat y_acceleration = 0.0f, time_since_jump_fall = 1.0f;
+GLfloat player_movement_speed[2] = { -0.1f, -0.1f };
 
 void Player::PlayerAir(GLfloat total_delta_time)
 {
-	player_delta_time += total_delta_time;
+	player_delta_time += total_delta_time;	
 	
-	bool is_player_falling = true; //to be moved and determined in game - set as true for collision testing purposes
-	
-	if (is_player_falling && player_delta_time > 0.0167f)
+	if (!player_jump)
 	{
-		//std::cout << player_position[1] << " " ;
-		//GLfloat player_min_max_x_y[] = { 0.0f + player_position[0], 1.0f + player_position[0], 0.0f + player_position[1], 1.0f + player_position[1] };
-		//bool player_on_ground = collision.DetectCollision(player_min_max_x_y);
-		//std::cout << is_player_falling << std::endl;
-		bool player_on_ground = collision.DetectCollision(player_hitbox_vertices, player_position);
-
-		if (player_on_ground == true)
+		if (is_player_falling && player_delta_time > 0.0167f)
 		{
-			is_player_falling = false;
-		}
-		else
-		{
-			//player_position[0] += 0.05f;
-			player_position[1] -= 0.05f;
+			if(y_acceleration < 0.2f)
+				y_acceleration = 0.05f * ((time_since_jump_fall - 1.0f)/2 + 1.0f);
 
+			time_since_jump_fall += player_delta_time;
+
+			player_on_ground = collision.DetectCollision(player_hitbox_vertices, player_position, is_player_falling, player_movement_speed[1]);
+
+			if (player_on_ground[2] == 1)
+			{
+				is_player_falling = true;
+				player_position[1] -= y_acceleration;
+			}
+			else if (player_on_ground[0] >= -1.0f && player_on_ground[0] <= 1.0f)
+			{
+				is_player_falling = false;
+			}
+			else
+			{//CHECK THIS OPLACES
+				if(player_position[0] > 0)
+					player_position[1] += player_on_ground[0] / 50;
+				else
+					player_position[1] -= player_on_ground[0] / 50;
+				player_position[0] = (player_position[1] - player_on_ground[1]) / player_on_ground[0] - 1.0f;
+			}
+
+			player_collision_line_data[0] = player_on_ground[0];
+			player_collision_line_data[1] = player_on_ground[1];
+			player_collision_line_data[2] = player_on_ground[2]; //checks if m = inf
+			//std::cout << player_collision_line_data[0] << " " << player_collision_line_data[1] << " " << player_collision_line_data[2] << " ";
+			player_delta_time = 0.0f;
 		}
+	}
+	else if (player_delta_time > 0.0167f)
+	{
+		y_acceleration -= 0.05f * time_since_jump_fall;
+		time_since_jump_fall += player_delta_time;
+
+		if (y_acceleration < 0.01f)
+		{
+			y_acceleration = 0.0f;
+			player_jump = false;
+			time_since_jump_fall = 1.0f;
+			is_player_falling = true;
+		}
+
+		player_position[1] += y_acceleration;
 
 		player_delta_time = 0.0f;
 	}
+
+	if (!is_player_falling && !player_jump)
+	{
+		time_since_jump_fall = 1.0f;
+		y_acceleration = 0.0f;
+	}
+}
+
+void Player::PlayerJump()
+{
+	if (!is_player_falling)
+	{
+		player_jump = true;
+		time_since_jump_fall = 1.0f;
+		y_acceleration = 0.9f;
+	}
+}
+
+
+void Player::MovePlayer(GLint key)
+{
+	GLfloat dist_to_corner;
+
+
+	/*
+		0 = MOVE LEFT
+		1 = MOVE RIGHT
+	*/
+	if (key == 0)
+	{
+		GLfloat * can_move_in_direction = collision.DetectWall(player_hitbox_vertices, player_position, player_movement_speed, 0, -0.1f);
+		
+		if (can_move_in_direction[0] == 1)
+		{
+			std::cout << player_collision_line_data[0] << " " << player_collision_line_data[1] << " ";
+
+			if (is_player_falling || player_jump)
+			{
+				player_position[0] -= 0.1f;
+				player_position[1] -= 0.1f;
+			}
+			else if (can_move_in_direction[1] <= 1.0f && can_move_in_direction[1] > 0.0f)
+			{
+				player_position[0] += 0.1f;
+				player_position[1] = player_position[0] * can_move_in_direction[1] + can_move_in_direction[2];
+			}
+			else
+			{
+				std::cout << "fdsfd \n\n move: ";
+				std::cout << can_move_in_direction[1] << "  " << can_move_in_direction[2] << "\n\n";
+				player_position[0] -= 0.1f;
+				//dist_to_corner = 0.70711;
+				player_position[1] = player_position[0] * player_collision_line_data[0] + player_collision_line_data[1];
+			}
+		}
+	}
+
+	if(key == 1)
+	{
+		GLfloat * can_move_in_direction = collision.DetectWall(player_hitbox_vertices, player_position, player_movement_speed, 0, -0.1f);
+
+		if (can_move_in_direction[0] == 1)
+		{
+			if (is_player_falling || player_jump)
+			{
+				player_position[0] += 0.1f;
+				player_position[1] -= 0.1f;
+			}
+			else
+			{
+				player_position[0] += 0.1f;
+				player_position[1] = player_position[0] * player_collision_line_data[0] + player_collision_line_data[1];
+			}
+		}
+	}
+
 }
 
 void Player::DrawPlayer(bool loadedInitial, Shader ourShader)

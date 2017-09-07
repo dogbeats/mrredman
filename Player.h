@@ -10,5 +10,7 @@ public:
 	~Player();
 	void DrawPlayer(bool loadedInitial, Shader ourShader);
 	void PlayerAir(GLfloat total_delta_time);
+	void PlayerJump();
+	void MovePlayer(GLint key);
 };
 

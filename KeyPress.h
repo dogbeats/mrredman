@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+#include "Player.h"
+#include "Render.h"
 // GLEW
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -24,10 +26,8 @@
 
 extern GLfloat fov;
 extern GLfloat cameraSpeed;
-extern GLfloat rotatePlaneAngle;
 extern GLfloat deltaTime;
-extern GLint localProjectileNumber;
-extern bool hasCollided[1024];
+
 
 //to delete probs
 extern GLint hasInitLocation;
@@ -35,8 +35,10 @@ extern GLint hasInitLocation;
 class KeyPress
 {
 public:
-	void keyCallback(GLFWwindow* window);
-	void space_press();
+	void KeyCallback(GLFWwindow* window);
+
+private:
+	void DoMovement();
 
 
 };

@@ -30,7 +30,7 @@ GLfloat delayTime = 0.0f;
 time_t timet;
 Player player;
 Object object;
-char* file_names[] = { "objects/test_object.txt" };//, "objects/test_object_2.txt" };
+char* file_names[] = { "objects/test_object.txt", "objects/test_object_2.txt" };//, "objects/test_object_2.txt" };
 
 Render::Render()
 {
@@ -177,7 +177,6 @@ void Render::DrawObj(Shader ourShader, GLFWwindow* window)
 		loadedInitial = true;
 	}
 
-
 	if (true) //globalDeltaTime >= 0.0001f
 	{
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -216,7 +215,7 @@ void Render::DrawObj(Shader ourShader, GLFWwindow* window)
 
 		glBindVertexArray(VAO);
 
-		glm::mat4 model;
+		glm::mat4 model[2], model_hitbox[2];
 		glm::vec3 tempPos;
 		
 		for (int i = 0; i < sizeof(file_names) / sizeof(file_names[0]); i++)
@@ -226,10 +225,10 @@ void Render::DrawObj(Shader ourShader, GLFWwindow* window)
 			glBindTexture(GL_TEXTURE_2D, texture[0]);
 			glUniform1i(glGetUniformLocation(ourShader.Program, "ourTexture1"), 0);
 
-			model = glm::translate(model, object_position[i]); //* glm::mat4(10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f );//* object_scale[i];
-			model *= glm::mat4(object_scale[i], 0.0f, 0.0f, 0.0f, 0.0f, object_scale[i], 0.0f, 0.0f, 0.0f, 0.0f, object_scale[i], 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+			model[i] = glm::translate(model[i], object_position[i]); //* glm::mat4(10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f );//* object_scale[i];
+			model[i] *= glm::mat4(object_scale[i], 0.0f, 0.0f, 0.0f, 0.0f, object_scale[i], 0.0f, 0.0f, 0.0f, 0.0f, object_scale[i], 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model[i]));
 			if (i == 0)
 				glDrawArrays(GL_TRIANGLES, start_draw[i], end_draw[i]);
 			else
@@ -239,23 +238,23 @@ void Render::DrawObj(Shader ourShader, GLFWwindow* window)
 		}
 		
 		glBindVertexArray(VAO_hitbox);
-		
+						
 		for (int i = 0; i < sizeof(file_names) / sizeof(file_names[0]); i++)
 		{
 			
 			glBindTexture(GL_TEXTURE_2D, 0);
 			//glBindTexture(GL_TEXTURE_2D, texture[0]);
 			glUniform1i(glGetUniformLocation(ourShader.Program, "ourTexture1"), 0);
-
-			model = glm::translate(model, object_position[i]); //* glm::mat4(10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f );//* object_scale[i];
-			model *= glm::mat4(object_scale[i], 0.0f, 0.0f, 0.0f, 0.0f, object_scale[i], 0.0f, 0.0f, 0.0f, 0.0f, object_scale[i], 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+			
+			model_hitbox[i] = glm::translate(model_hitbox[i], object_position[i]); //* glm::mat4(10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f );//* object_scale[i];
+			model_hitbox[i] *= glm::mat4(object_scale[i], 0.0f, 0.0f, 0.0f, 0.0f, object_scale[i], 0.0f, 0.0f, 0.0f, 0.0f, object_scale[i], 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 		
 			glLineWidth(1.0f);
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-			//if (i == 0)
-				glDrawArrays(GL_LINES, 0, number_of_hitbox_lines[0]*2);
-			//else
-				//glDrawArrays(GL_LINES, end_draw[i - 1], end_draw[i]);
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model_hitbox[i]));
+			if (i == 0)
+				glDrawArrays(GL_LINES, 0, number_of_hitbox_lines[i]*2);
+			else
+				glDrawArrays(GL_LINES, 10, number_of_hitbox_lines[i] * 2);
 			//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		}
