@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+	<head>
+		<style>
+		 li.p100
+		 {
+			background-color: #23ff00;
+		 }
+		 
+		 li.p75
+		 {
+			background-color: #aaff00;
+		 }
+		 
+		 li.p50
+		 {
+			background-color: #ffec00;
+		 }
+		 
+		 li.p25
+		 {
+			background-color: #ff7800;
+		 }
+		 
+		 li.p0
+		 {
+			background-color: #ff0000;
+		 }
+		</style>
+	</head>
+	
+	<body>
+		<h1>To do List</h1>
+		<h2>High Priority</h2>
+		<ul> 
+			<li class="p50">Environment collision</li>
+			<li class="p0">Object class implementation</li>
+				<ul>
+					<li class="p0">Parent - obj: position, hitbox coordinates,</li>
+					<li class="p0">Look into different types of object behaviours (ice/lava/sand?)</li>
+				</ul>
+			<li class="p0">Enemy class implementation</li>
+				<ul>
+					<li class="p0">Parent - Enemy: Hitbox(es)</li>
+					<li class="p0">Child - Drone: Colour? Damage</li>
+					<li class="p0">Child - Boss?: </li>
+				</ul>
+			<li class="p25">Controls</li>
+			<li class="p25">Camera</li>
+			<li class="p0">Enemy AI/pathfinding</li>
+		</ul>
+		
+		<h2>Mid Priority</h2>
+		<ul>
+			<li class="p0">Level designs</li>
+			<li class="p0">Projectile collision</li>
+			<li class="p0">Level loading/dumping</li>
+			<li class="p0">Game saving/loading</li>
+			<li class="p25">(Final) Graphic Designs</li>
+				<ul>
+					<li class="p75">Main character</li>
+					<li class="p0">Environment mock-ups</li>
+					<li class="p25">Enemies</li>
+					<li class="p0">Menu/GUI</li>
+				</ul>
+			<li class="p25">Animation</li>
+				<ul>
+					<li class="p0">Coding implementation</li>
+					<li class="p50">Running/movement sprites</li>
+					<li class="p25">Jumping sprites</li>
+					<li class="p25">Idle sprites</li>
+					<li class="p0">"Power" sprites</li>
+				</ul>
+		</ul>
+		
+		<h2>Low Priority</h2>
+		<ul>
+			<li class="p0">Time trial implementation</li>	
+			<li class="p0">Menu (coding)</li>
+			<li class="p0">Lighting/shading - ?</li>
+			<li class="p0">Splash Screen</li>
+		</ul>
+		
+		<br />
+		<br />
+		<h1>Log/Diary</h1>
+		<p>
+			13/09/17 - Log/diary started to note thoughts and issues of development over time. Changed the origin of the player to be more central. Collision becoming more accurate but seems to not detect collision when moving of lines with certain gradients when the player moves right. Possibly linked to the potential issue where the x-intersect and y-intersect are inaccurate. Also need to work on sliding down when the gradient is above a certain value.
+		</p>
+	</body>
+</html>
