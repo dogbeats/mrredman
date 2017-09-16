@@ -78,25 +78,6 @@ void KeyAssign(GLFWwindow* window, int key, int scancode, int action, int mode)
 
 void KeyPress::DoMovement()
 {
-	if (keys[GLFW_KEY_W])
-	{
-		if (cameraSpeed <= 5.0f)
-		{
-			cameraSpeed += deltaTime;
-		}
-	}
-	if (keys[GLFW_KEY_S])
-	{
-		if (cameraSpeed >= 1.0f)
-		{
-			cameraSpeed -= deltaTime;
-		}
-	}
-	if (keys[GLFW_KEY_A])
-	{
-	}
-	if (keys[GLFW_KEY_D])
-	{
-	}
+
 
 }

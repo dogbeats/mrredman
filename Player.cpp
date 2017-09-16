@@ -3,23 +3,23 @@
 GLuint VAO_p, VBO_p, VAO_p_hitbox, VBO_p_hitbox;
 
 GLfloat player_vertices[] = {
-	0.5f, 1.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f, /**/ 1.0f, 1.0f, //bottom left
-	-0.5f, 1.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f, /**/ 0.0f, 1.0f, //bottom right
-	0.5f, 0.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f, /**/ 1.0f, 0.0f, //top left
-	-0.5f, 0.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f, /**/ 0.0f, 0.0f, //top right
-	-0.5f, 1.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f, /**/ 0.0f, 1.0f, //bottom right
-	0.5f, 0.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f, /**/ 1.0f, 0.0f, //bottom left
+	0.25f, 1.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f, /**/ 1.0f, 1.0f, //bottom left
+	-0.25f, 1.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f, /**/ 0.0f, 1.0f, //bottom right
+	0.25f, 0.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f, /**/ 1.0f, 0.0f, //top left
+	-0.25f, 0.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f, /**/ 0.0f, 0.0f, //top right
+	-0.25f, 1.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f, /**/ 0.0f, 1.0f, //bottom right
+	0.25f, 0.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f, /**/ 1.0f, 0.0f, //bottom left
 };
 
 GLfloat player_hitbox_vertices[] = {
-	0.5f, 1.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f, //0
-	-0.5f, 1.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f,
-	-0.5f, 1.0f, 0.0f, /**/ 0.0f, 0.0f, 0.0f, 1.0f, //2
-	-0.5f, -0.0f, 0.0f, /**/ 0.0f, 0.0f, 0.0f, 1.0f,
-	-0.5f, -0.0f, 0.0f, /**/ 0.0f, 0.0f, 1.0f, 1.0f, //4
-	0.5f, -0.0f, 0.0f, /**/ 0.0f, 0.0f, 1.0f, 1.0f,
-	0.5f, -0.0f, 0.0f, /**/ 1.0f, 0.0f, 0.0f, 1.0f, //6
-	0.5f, 1.0f, 0.0f, /**/ 1.0f, 0.0f, 0.0f, 1.0f
+	0.25f, 1.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f, //0
+	-0.25f, 1.0f, 0.0f, /**/ 1.0f, 1.0f, 1.0f, 1.0f,
+	-0.25f, 1.0f, 0.0f, /**/ 0.0f, 0.0f, 0.0f, 1.0f, //2
+	-0.25f, -0.0f, 0.0f, /**/ 0.0f, 0.0f, 0.0f, 1.0f,
+	-0.25f, -0.0f, 0.0f, /**/ 0.0f, 0.0f, 1.0f, 1.0f, //4
+	0.25f, -0.0f, 0.0f, /**/ 0.0f, 0.0f, 1.0f, 1.0f,
+	0.25f, -0.0f, 0.0f, /**/ 1.0f, 0.0f, 0.0f, 1.0f, //6
+	0.25f, 1.0f, 0.0f, /**/ 1.0f, 0.0f, 0.0f, 1.0f
 };
 
 glm::vec3 player_position = glm::vec3(2.5f,  8.0f, 0.0f);
@@ -46,6 +46,11 @@ GLfloat player_collision_line_data[3] = { 0, 0, 1 };
 bool is_player_falling = true; //to be moved and determined in game - set as true for collision testing purposes
 GLfloat y_acceleration = 0.0f, time_since_jump_fall = 1.0f;
 GLfloat player_movement_speed[2] = { -0.1f, -0.1f };
+
+glm::vec3 Player::GetPlayerPosition()
+{
+	return player_position;
+}
 
 void Player::PlayerAir(GLfloat total_delta_time)
 {
@@ -76,16 +81,16 @@ void Player::PlayerAir(GLfloat total_delta_time)
 				else
 					player_position[1] = player_on_ground[0] * player_position[0] + player_on_ground[1];
 
-				//std::cout << " y = " << player_on_ground[0] << "x + " << player_
+//std::cout << " y = " << player_on_ground[0] << "x + " << player_
 			}
 			else
 			{//CHECK THIS OPLACES
 
-				if(player_on_ground[0] > 0)
+				if (player_on_ground[0] > 0)
 					player_position[0] -= 0.1f;
 				else
 					player_position[0] += 0.1f;
-				
+
 				GLfloat temp_c_2 = player_position[1] - player_position[0] * player_on_ground[0]; // needs to be replaced with something "proper" -> player_on_ground[1] c value incorrect?
 
 				//std::cout << player_position[0] << " " << player_position[1] << "   p_o_g 1 and 2 " << player_on_ground[0] << " " << player_on_ground[1] << " " << player_on_ground[2] << "\n";
@@ -174,14 +179,20 @@ void Player::MovePlayer(GLint key)
 				//dist_to_corner = 0.70711;
 				player_position[1] = player_position[0] * player_collision_line_data[0] + player_collision_line_data[1];
 			}
+		}	
+		else if (can_move_in_direction[0] == -1)
+		{
+			std::cout << "\nfalling\n";
+			player_position[0] -= 0.1f;
+			is_player_falling = true;
 		}
-		
+
 	}
 
 	if (key == 1)
 	{
 		can_move_in_direction = 0;
-		can_move_in_direction = collision.DetectWall(player_hitbox_vertices, player_position, player_movement_speed, 0, -0.1f);
+		can_move_in_direction = collision.DetectWall(player_hitbox_vertices, player_position, player_movement_speed, 0, 0.1f);
 
 		if (can_move_in_direction[0] == 1)
 		{
@@ -192,7 +203,7 @@ void Player::MovePlayer(GLint key)
 				player_position[0] += 0.1f;
 				//player_position[1] -= 0.1f;
 			}
-			else if (can_move_in_direction[1] < 0.0f && can_move_in_direction[1] >= -1.0f)
+			else if (can_move_in_direction[1] < 1.0f && can_move_in_direction[1] >= 0.0f)
 			{
 				player_collision_line_data[0] = can_move_in_direction[1];
 				player_collision_line_data[1] = can_move_in_direction[2];
@@ -208,6 +219,12 @@ void Player::MovePlayer(GLint key)
 				//dist_to_corner = 0.70711;
 				player_position[1] = player_position[0] * player_collision_line_data[0] + player_collision_line_data[1];
 			}
+		}
+		else if (can_move_in_direction[0] == -1)
+		{
+			std::cout << "\nfalling\n";
+			player_position[0] += 0.1f;
+			is_player_falling = true;
 		}
 	}
 }

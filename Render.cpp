@@ -11,12 +11,10 @@ GLuint WIDTH = 800, HEIGHT = 600;
 //void do_movement();
 
 // Camera
-glm::vec3 cameraPos = glm::vec3(0.3f, 0.2f, 3.0f);
+glm::vec3 cameraPos = glm::vec3(2.5f, 8.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, -1.0f, 0.0f);
-glm::vec4 cameraUp4 = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
-GLfloat yaw = -90.0f;	// Yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right (due to how Eular angles work) so we initially rotate a bit to the left.
-GLfloat pitch = 0.0f;
+
 GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
 GLfloat fov = 11.0f;
@@ -169,9 +167,14 @@ void Render::DrawObj(Shader ourShader, GLFWwindow* window)
 		glEnableVertexAttribArray(1);
 		glBindVertexArray(0); // Unbind VAO
 
-		char *temp_texture_name = new char[texture_name[0].length() + 1];
-		strcpy_s(temp_texture_name, texture_name[0].length() + 1, texture_name[0].c_str());
-		CallTexture(0, temp_texture_name);
+		char *temp_texture_name[2]; //to change to vector
+
+		for (int i = 0; i < 2; i++)
+		{
+			temp_texture_name[i] = new char[texture_name[i].length() + 1];
+			strcpy_s(temp_texture_name[i], texture_name[i].length() + 1, texture_name[i].c_str());
+			CallTexture(i, temp_texture_name[i]);
+		}
 		player.DrawPlayer(loadedInitial, ourShader);
 
 		loadedInitial = true;
@@ -179,6 +182,9 @@ void Render::DrawObj(Shader ourShader, GLFWwindow* window)
 
 	if (true) //globalDeltaTime >= 0.0001f
 	{
+		cameraPos = player.GetPlayerPosition();
+		cameraPos[2] = 3.0f;
+
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -212,7 +218,7 @@ void Render::DrawObj(Shader ourShader, GLFWwindow* window)
 
 		//text.drawText("ababbaabhello", ourShader, cameraUp, cameraSpeed, deltaTime, fov, cubePositions[0]);
 
-
+		player.DrawPlayer(loadedInitial, ourShader);
 		glBindVertexArray(VAO);
 
 		glm::mat4 model[2], model_hitbox[2];
@@ -222,7 +228,7 @@ void Render::DrawObj(Shader ourShader, GLFWwindow* window)
 		{
 			//background
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, texture[0]);
+			glBindTexture(GL_TEXTURE_2D, texture[i]);
 			glUniform1i(glGetUniformLocation(ourShader.Program, "ourTexture1"), 0);
 
 			model[i] = glm::translate(model[i], object_position[i]); //* glm::mat4(10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f );//* object_scale[i];
@@ -260,7 +266,6 @@ void Render::DrawObj(Shader ourShader, GLFWwindow* window)
 		}
 
 		glBindVertexArray(0);
-		player.DrawPlayer(loadedInitial, ourShader);
 
 	}
 }

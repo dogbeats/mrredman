@@ -42,6 +42,8 @@ GLfloat number_switch = 0;
 GLfloat temp_m, temp_c, temp_y, temp_m_player, temp_c_player, temp_y_player;
 GLfloat return_values[3]; //temp_m, temp_c
 GLfloat player_on_slope_details[6] = { 0, 0, 0, 0, 0, 0 }; //x1, x2, y1, y2, m, c
+GLint player_collided_line[2] = { -1, -1 };
+GLint ticks_to_fall = 0;
 
 GLfloat * Collision::DetectWall(GLfloat player_hitbox_vertices[], glm::vec3 player_position, GLfloat player_movement[2], GLint player_direction, GLfloat player_movement_speed) //player_movement - x movement, y movement ; player_direction 0,1,2,3 / L,R,U,D
 {
@@ -67,21 +69,21 @@ GLfloat * Collision::DetectWall(GLfloat player_hitbox_vertices[], glm::vec3 play
 		if (origin_distance < 0)
 			origin_distance *= -1;
 
-		if (origin_distance < 10.5f)
+		if (origin_distance < 15.5f)
 		{
 			for (int i = 0; i < number_of_hitbox_lines[k] * 14; i++)
 			{
 				if ((i + 1) % 7 == 1)
 				{
-					object_points.push_back(object_hitbox[i] + object_position[k][0]);
+					object_points.push_back((object_hitbox[i] + object_position[k][0]) * object_scale[k]);
 				}
 				if ((i + 1) % 7 == 2)
 				{
-					object_points.push_back(object_hitbox[i] + object_position[k][1]);
+					object_points.push_back((object_hitbox[i] + object_position[k][1]) * object_scale[k]);
 				}
 				if ((i + 1) % 7 == 3)
 				{
-					object_points.push_back(object_hitbox[i] + object_position[k][2]);
+					object_points.push_back((object_hitbox[i] + object_position[k][2]) * object_scale[k]);
 				}
 			}
 
@@ -158,10 +160,23 @@ GLfloat * Collision::DetectWall(GLfloat player_hitbox_vertices[], glm::vec3 play
 						}
 
 						bool is_gradient_inf = false;
-						GLfloat x_intersect;
-						x_intersect = (temp_c_player - temp_c) / (temp_m - temp_m_player ); //issues here - should output the accurate result as temp_m_player - temp_m? but proving otherwise
-						GLfloat y_intersect = temp_m_player * x_intersect + temp_c_player;
+						GLfloat x_intersect, y_intersect;
 
+						if (temp_y_player == 0)
+						{
+							x_intersect = temp_c_player;
+							y_intersect = temp_m * x_intersect + temp_c;
+						}
+						else if (temp_m_player == 0)
+						{
+							y_intersect = temp_c_player;
+							x_intersect = (y_intersect - temp_c) / temp_m;
+						}
+						else
+						{
+							x_intersect = (temp_c_player - temp_c) / (temp_m - temp_m_player); //issues here - should output the accurate result as temp_m_player - temp_m? but proving otherwise
+							y_intersect = temp_m_player * x_intersect + temp_c_player;
+						}
 						//std::cout << " k: " << k << "   i: " << i << " x, y: " << x_intersect << " " << y_intersect << "\n";
 						
 						if (temp_m == temp_m_player)
@@ -298,14 +313,15 @@ GLfloat * Collision::DetectWall(GLfloat player_hitbox_vertices[], glm::vec3 play
 									std::cout << "two\n";
 								std::cout << " B collision\n";
 
+		
+								player_collided_line[0] = j;
+								player_collided_line[1] = k;
+								std::cout << "THIS IS pcl  " << player_collided_line[0] << "\n\n";
 								return_values[0] = 0; //can move
 								return_values[1] = temp_m;
 								return_values[2] = temp_c;
 
-								if (temp_m < 0)
-									temp_m *= -1;
-
-								if (temp_m <= 1.0f)
+								if (temp_m <= 1.0f && temp_m >= -1.0f)
 									return_values[0] = 1;
 
 								std::cout << "return vaues 0 1 2:    " << return_values[0] << " " << return_values[1] << " " << return_values[2] << " \n";
@@ -315,11 +331,27 @@ GLfloat * Collision::DetectWall(GLfloat player_hitbox_vertices[], glm::vec3 play
 						}
 					}
 				}
+
+				if (j == player_collided_line[0] && k == player_collided_line[1] && ticks_to_fall > 0) //test removing ticks to fall
+				{
+					std::cout << "THIS IS J\n\n\n";
+					return_values[0] = -1; //can move
+					return_values[1] = 0;
+					return_values[2] = 0;
+					ticks_to_fall = 0;
+					return return_values;
+				}
+				else if (j == player_collided_line[0] && k == player_collided_line[1])
+				{
+					ticks_to_fall++;
+				}
+				std::cout << "ticks to fall: " << ticks_to_fall;
 			}
 			std::cout << "\n\n";
 			object_points.clear();
 		}
 	}
+
 	GLfloat return_values[3] = { 1, 1, 1 };
 	return return_values;
 }
@@ -481,9 +513,8 @@ GLfloat * Collision::LineIntersection(GLfloat hitbox_x1, GLfloat hitbox_y1, GLfl
 					return return_values;
 				}
 			}
-			else if ((x_intersect >= hitbox_x2 && x_intersect <= hitbox_x1 && y_intersect >= hitbox_y2 && y_intersect <= hitbox_y1) && (x_intersect >= player_h_x2 && x_intersect <= player_h_x1 && y_intersect >= player_h_y2 && y_intersect <= player_h_y1))
-				//if(x_intersect <= player_h_x1 && x_intersect >= player_h_x2 && y_intersect <= player_h_y1 && y_intersect >= player_h_y2 &&
-				//	x_intersect <= hitbox_x1 && x_intersect >= hitbox_x2 && y_intersect <= hitbox_y1 && y_intersect >= hitbox_y2)
+			else if ((x_intersect >= hitbox_x2 - 0.05f && x_intersect <= hitbox_x1 + 0.05f && y_intersect >= hitbox_y2 - 0.05f && y_intersect <= hitbox_y1 + 0.05f) && (x_intersect >= player_h_x2 - 0.05f && x_intersect <= player_h_x1 + 0.05f && y_intersect >= player_h_y2 - 0.05f && y_intersect <= player_h_y1 + 0.05f))
+				//Modify this such that if the distance between player origin > player falling speed, then doesn't collide but recognises it is about to and will add values accordingly
 			{
 				//std::cout << i << " : " << x_intersect << " " << y_intersect << " : " << hitbox_x1 << " " << hitbox_y1 << " : " << hitbox_x2 << " " << hitbox_y2 << " : " << player_h_x1 << " " << player_h_y1 << " : " << player_h_x2 << " " << player_h_y2 << "\n\n";
 				if (temp_m > 1.0f)
@@ -496,8 +527,8 @@ GLfloat * Collision::LineIntersection(GLfloat hitbox_x1, GLfloat hitbox_y1, GLfl
 				return_values[2] = 0;
 				return_values[3] = 0;
 
-				std::cout << "deets: " << x_intersect << ", " << y_intersect << " : " << hitbox_x1 << ", " << hitbox_x2 << ", " << hitbox_y1 << ", " << hitbox_y2 << " : " << player_h_x1 << ", " << player_h_x2 << ", " << player_h_y1 << ", " << player_h_y2 << "\n";
-				std::cout << "temp m: " << temp_m << " " << temp_m_player << " temp c: " << temp_c << " " << temp_c_player << "     " << temp_y_player << "\n\n";
+				//std::cout << "deets: " << x_intersect << ", " << y_intersect << " : " << hitbox_x1 << ", " << hitbox_x2 << ", " << hitbox_y1 << ", " << hitbox_y2 << " : " << player_h_x1 << ", " << player_h_x2 << ", " << player_h_y1 << ", " << player_h_y2 << "\n";
+				//std::cout << "temp m: " << temp_m << " " << temp_m_player << " temp c: " << temp_c << " " << temp_c_player << "     " << temp_y_player << "\n\n";
 
 				player_on_slope_details[0] = hitbox_x1;
 				player_on_slope_details[1] = hitbox_x2;
@@ -571,15 +602,15 @@ GLfloat * Collision::DetectCollision(GLfloat player_hitbox_vertices[], glm::vec3
 			{
 				if ((i + 1) % 7 == 1)
 				{
-					object_points.push_back(object_hitbox[i] + object_position[k][0]);
+					object_points.push_back((object_hitbox[i] + object_position[k][0]) * object_scale[k]);
 				}
 				if ((i + 1) % 7 == 2)
 				{
-					object_points.push_back(object_hitbox[i] + object_position[k][1]);
+					object_points.push_back((object_hitbox[i] + object_position[k][1])* object_scale[k]);
 				}
 				if ((i + 1) % 7 == 3)
 				{
-					object_points.push_back(object_hitbox[i] + object_position[k][2]);
+					object_points.push_back((object_hitbox[i] + object_position[k][2])* object_scale[k]);
 				}
 
 			}
