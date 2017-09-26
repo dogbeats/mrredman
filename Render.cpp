@@ -15,6 +15,9 @@ glm::vec3 cameraPos = glm::vec3(2.5f, 8.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, -1.0f, 0.0f);
 
+//temporary rotation - to delete
+GLfloat temp_rotate = 0;
+
 GLfloat lastX = WIDTH / 2.0;
 GLfloat lastY = HEIGHT / 2.0;
 GLfloat fov = 11.0f;
@@ -28,7 +31,7 @@ GLfloat delayTime = 0.0f;
 time_t timet;
 Player player;
 Object object;
-char* file_names[] = { "objects/test_object.txt", "objects/test_object_2.txt" };//, "objects/test_object_2.txt" };
+char* file_names[] = { "objects/test_object.txt", "objects/test_object_2.txt", "objects/test_object_building.txt" };//, "objects/test_object_2.txt" };
 
 Render::Render()
 {
@@ -104,6 +107,7 @@ Render render;
 
 GLfloat objectWidthTemp, objectHeightTemp;
 
+
 void Render::CallTexture(GLint textureNumber, char* fileName)
 {
 	glGenTextures(1, &texture[textureNumber]);
@@ -128,6 +132,7 @@ void Render::DrawObj(Shader ourShader, GLFWwindow* window)
 	
 	if (!loadedInitial)
 	{
+
 		for(int i = 0; i < sizeof(file_names) / sizeof(file_names[0]); i++)
 			object.FetchObjectFileData(file_names[i]);
 
@@ -167,9 +172,9 @@ void Render::DrawObj(Shader ourShader, GLFWwindow* window)
 		glEnableVertexAttribArray(1);
 		glBindVertexArray(0); // Unbind VAO
 
-		char *temp_texture_name[2]; //to change to vector
+		char *temp_texture_name[3]; //to change to vector
 
-		for (int i = 0; i < 2; i++)
+		for (int i = 0; i < 3; i++)
 		{
 			temp_texture_name[i] = new char[texture_name[i].length() + 1];
 			strcpy_s(temp_texture_name[i], texture_name[i].length() + 1, texture_name[i].c_str());
@@ -218,10 +223,12 @@ void Render::DrawObj(Shader ourShader, GLFWwindow* window)
 
 		//text.drawText("ababbaabhello", ourShader, cameraUp, cameraSpeed, deltaTime, fov, cubePositions[0]);
 
+		//temp_rotate = 2.0f;//+= 1.0f * deltaTime;
+
 		player.DrawPlayer(loadedInitial, ourShader);
 		glBindVertexArray(VAO);
 
-		glm::mat4 model[2], model_hitbox[2];
+		glm::mat4 model[3], model_hitbox[3];
 		glm::vec3 tempPos;
 		
 		for (int i = 0; i < sizeof(file_names) / sizeof(file_names[0]); i++)
@@ -234,6 +241,9 @@ void Render::DrawObj(Shader ourShader, GLFWwindow* window)
 			model[i] = glm::translate(model[i], object_position[i]); //* glm::mat4(10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f );//* object_scale[i];
 			model[i] *= glm::mat4(object_scale[i], 0.0f, 0.0f, 0.0f, 0.0f, object_scale[i], 0.0f, 0.0f, 0.0f, 0.0f, object_scale[i], 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 
+			//if (i == 1)
+					//model[i] *= glm::mat4(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, cos(temp_rotate), -sin(temp_rotate), 0.0f, 0.0f, sin(temp_rotate), cos(temp_rotate), 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model[i]));
 			if (i == 0)
 				glDrawArrays(GL_TRIANGLES, start_draw[i], end_draw[i]);
@@ -244,7 +254,10 @@ void Render::DrawObj(Shader ourShader, GLFWwindow* window)
 		}
 		
 		glBindVertexArray(VAO_hitbox);
-						
+					
+		GLint line_count;
+		line_count = 0;
+
 		for (int i = 0; i < sizeof(file_names) / sizeof(file_names[0]); i++)
 		{
 			
@@ -254,18 +267,26 @@ void Render::DrawObj(Shader ourShader, GLFWwindow* window)
 			
 			model_hitbox[i] = glm::translate(model_hitbox[i], object_position[i]); //* glm::mat4(10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10.0f );//* object_scale[i];
 			model_hitbox[i] *= glm::mat4(object_scale[i], 0.0f, 0.0f, 0.0f, 0.0f, object_scale[i], 0.0f, 0.0f, 0.0f, 0.0f, object_scale[i], 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
-		
+
 			glLineWidth(1.0f);
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model_hitbox[i]));
 			if (i == 0)
-				glDrawArrays(GL_LINES, 0, number_of_hitbox_lines[i]*2);
-			else
-				glDrawArrays(GL_LINES, 10, number_of_hitbox_lines[i] * 2);
+				glDrawArrays(GL_LINES, 0, number_of_hitbox_lines[i] * 2);
+			else 
+				glDrawArrays(GL_LINES, line_count, number_of_hitbox_lines[i] * 2);
 			//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+			line_count += number_of_hitbox_lines[i] * 2;
 
 		}
 
 		glBindVertexArray(0);
 
 	}
+}
+
+void Render::FetchCameraPosition(GLfloat &camera_x, GLfloat &camera_y)
+{
+	camera_x = cameraPos[0];
+	camera_y = cameraPos[1];
 }

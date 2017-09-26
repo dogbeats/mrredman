@@ -93,7 +93,8 @@ void Object::FetchObjectFileData(char* object_names)
 
 				if (read_number == 1)
 				{
-					object_hitbox.push_back(std::stof(temp));
+					if(object_hitbox.size() > 0)
+						object_hitbox.push_back(std::stof(temp));
 					object_hitbox_count++;
 				}
 

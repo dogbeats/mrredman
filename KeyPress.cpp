@@ -46,17 +46,30 @@ void KeyAssign(GLFWwindow* window, int key, int scancode, int action, int mode)
 	{
 		fov += 0.2f;
 	}
+
 	if (key == GLFW_KEY_DOWN && action == GLFW_PRESS && fov >= 9.9)
 	{
 		fov -= 0.2f;
 	}
+
 	if (keys[GLFW_KEY_A])
 	{
-		player2.MovePlayer(0);
+		player2.StartMovement(0);
 	}
+
+	if (key == GLFW_KEY_A && action == GLFW_RELEASE)
+	{
+		player2.EndMovement();
+	}
+
 	if (keys[GLFW_KEY_D])
 	{
-		player2.MovePlayer(1);
+		player2.StartMovement(1);
+	}
+
+	if (key == GLFW_KEY_D && action == GLFW_RELEASE)
+	{
+		player2.EndMovement();
 	}
 
 	if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE)

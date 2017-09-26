@@ -49,6 +49,7 @@ class Render
 		void CallTexture(GLint textureNumber, char* fileName);
 		void DrawObj(Shader ourShader, GLFWwindow* window);
 		void calculateGlobalDelta();
+		void FetchCameraPosition(GLfloat &camera_x, GLfloat &camera_y);
 
 };
 #endif

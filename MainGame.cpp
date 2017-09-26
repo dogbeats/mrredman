@@ -9,6 +9,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
 double mouse_x_position, mouse_y_position;
+GLfloat camera_x, camera_y;
 clock_t testa;
 GLint secs = 0;
 #pragma comment(lib, "irrKlang.lib")
@@ -86,6 +87,12 @@ int MainGame::run()
 			{
 				render.Window(window, globalShader);
 				glfwGetCursorPos(window, &mouse_x_position, &mouse_y_position);
+				render.FetchCameraPosition(camera_x, camera_y);
+
+				mouse_x_position = mouse_x_position / 800 + camera_x;
+				mouse_y_position = mouse_y_position / 600 + camera_y;
+				//std::cout << "mouse x, y " << mouse_x_position << " " << mouse_y_position << "\n";
+
 				player.PlayerAir(total_delta_time);
 
 				total_delta_time = 0;

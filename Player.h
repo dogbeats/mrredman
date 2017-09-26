@@ -11,6 +11,12 @@ public:
 	void DrawPlayer(bool loadedInitial, Shader ourShader);
 	void PlayerAir(GLfloat total_delta_time);
 	void PlayerJump();
-	void MovePlayer(GLint key);
+	void MovePlayer(GLint key, GLfloat total_delta_time);
+	void EndMovement();
+	void StartMovement(GLint key);
+	glm::vec3 GetPlayerPosition();
+
+private:	
+	void UpdateXVelocity(GLint direction, GLfloat total_delta_time);
 };
 
