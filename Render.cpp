@@ -1,6 +1,25 @@
 #include "Render.h"
 
+// Quad vertices
+/*GLfloat quadVertices[] = {
+	-10.0f,  10.0f, 1.0f, 1.0f,
+	10.0f,  10.0f,  0.0f, 1.0f,
+	10.0f, -10.0f,  0.0f, 0.0f,
+				
+	10.0f, -10.0f,  0.0f, 0.0f,
+	-10.0f, -10.0f,  1.0f, 0.0f,
+	-10.0f,  10.0f,  1.0f, 1.0f
+};*/
 
+GLfloat quadVertices[] = {
+	-1.0f,  1.0f,0.0f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 1.0f,
+	1.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, //0,0 = bottom left
+	1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
+				
+	1.0f, -1.0f,  0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+	-1.0f, -1.0f,  0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+	-1.0f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 1.0f
+};
 
 GLuint WIDTH = 800, HEIGHT = 600;
 
@@ -48,6 +67,38 @@ void Render::InitialLoad()
 {
 }
 
+GLuint frameBuffer;
+GLuint texColorBuffer;
+GLuint rboDepthStencil;
+void Render::FrameTexture()
+{
+	// Create framebuffer
+	glGenFramebuffers(1, &frameBuffer);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+
+	// Create texture to hold color buffer
+	glGenTextures(1, &texColorBuffer);
+	glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
+
+
+	
+	glGenRenderbuffers(1, &rboDepthStencil);
+	glBindRenderbuffer(GL_RENDERBUFFER, rboDepthStencil);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboDepthStencil);
+
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 GLfloat soundDeltaTime = 0.0f;
 
 GLfloat currentFrame = glfwGetTime();
@@ -70,20 +121,27 @@ void Render::calculateGlobalDelta()
 }
 
 bool pauseGameS = false;
-void Render::Window(GLFWwindow* window, Shader ourShader)
+void Render::Window(GLFWwindow* window, Shader ourShader, Shader screen_shader)
 {
-	DrawObj(ourShader, window);
+	DrawObj(ourShader, screen_shader, window);
 
 	//time(&timet);
 	//std::cout << currentFrame << "\n" << deltaTime << "\n";
 	glfwSwapBuffers(window);
 }
 
+Shader Render::ScreenShader()
+{
+	Shader screen_shader("Shaders/screen_shader.vs", "Shaders/screen_shader.frag");
+	//glm::mat4 view;
+	//view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+	return screen_shader;
+}
+
 Shader Render::CompileShader()
 {
 	// Build and compile our shader program
 	Shader shader("Shaders/shader.vs", "Shaders/shader.frag");
-	shader.Use();
 	// Camera/View transformation
 	glm::mat4 view;
 	view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
@@ -127,11 +185,36 @@ void Render::CallTexture(GLint textureNumber, char* fileName)
 	glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture when done, so we won't accidentily mess up our texture.	
 }
 
-void Render::DrawObj(Shader ourShader, GLFWwindow* window)
+//framebuffer
+GLuint vaoQuad;
+GLuint vboQuad;
+
+
+void Render::DrawObj(Shader ourShader, Shader screen_shader, GLFWwindow* window)
 {
-	
 	if (!loadedInitial)
-	{
+	{		
+		//framebuffer deets
+		glGenVertexArrays(1, &vaoQuad);
+		glGenBuffers(1, &vboQuad);
+		glBindVertexArray(vaoQuad);
+		glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+
+		// Position attribute
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid*)0);
+		glEnableVertexAttribArray(0);
+		// Color attribute
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(1);
+		// TexCoord attribute
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid*)(7 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(2);
+		glBindVertexArray(0); // Unbind VAO	
+
+		glUniform1i(glGetUniformLocation(screen_shader.Program, "texFramebuffer"), 0);
+		FrameTexture();
+
 
 		for(int i = 0; i < sizeof(file_names) / sizeof(file_names[0]); i++)
 			object.FetchObjectFileData(file_names[i]);
@@ -187,12 +270,15 @@ void Render::DrawObj(Shader ourShader, GLFWwindow* window)
 
 	if (true) //globalDeltaTime >= 0.0001f
 	{
+		glUseProgram(ourShader.Program);
+		//cameraPos = glm::vec3(1.0f, 1.0f, 1.0f);
 		cameraPos = player.GetPlayerPosition();
 		cameraPos[2] = 3.0f;
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+	
+		
 		// Camera/View transformation
 		glm::mat4 view;
 		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
@@ -202,6 +288,7 @@ void Render::DrawObj(Shader ourShader, GLFWwindow* window)
 		GLint modelLoc = glGetUniformLocation(ourShader.Program, "model");
 		GLint viewLoc = glGetUniformLocation(ourShader.Program, "view");
 		GLint projLoc = glGetUniformLocation(ourShader.Program, "projection");
+
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		// Note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
@@ -224,6 +311,12 @@ void Render::DrawObj(Shader ourShader, GLFWwindow* window)
 		//text.drawText("ababbaabhello", ourShader, cameraUp, cameraSpeed, deltaTime, fov, cubePositions[0]);
 
 		//temp_rotate = 2.0f;//+= 1.0f * deltaTime;
+
+		//framebuffer
+		glEnable(GL_DEPTH_TEST);
+		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		
+
 
 		player.DrawPlayer(loadedInitial, ourShader);
 		glBindVertexArray(VAO);
@@ -279,9 +372,23 @@ void Render::DrawObj(Shader ourShader, GLFWwindow* window)
 			line_count += number_of_hitbox_lines[i] * 2;
 
 		}
-
+		
+		//frame buffer
+		
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindVertexArray(vaoQuad);
+		glDisable(GL_DEPTH_TEST);
+		glUseProgram(screen_shader.Program);
+		
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+		glUniform1i(glGetUniformLocation(screen_shader.Program, "texFramebuffer"), 0);
+		
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glUseProgram(ourShader.Program);
 		glBindVertexArray(0);
-
+		
+		
 	}
 }
 

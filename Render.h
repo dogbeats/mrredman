@@ -44,12 +44,16 @@ class Render
 		Render();
 		~Render();
 		void InitialLoad();
-		void Window(GLFWwindow* window, Shader ourShader);
+		void Window(GLFWwindow* window, Shader ourShader, Shader screen_shader);
 		Shader CompileShader();
+		Shader ScreenShader();
 		void CallTexture(GLint textureNumber, char* fileName);
-		void DrawObj(Shader ourShader, GLFWwindow* window);
+		void DrawObj(Shader ourShader, Shader screen_shader, GLFWwindow* window);
 		void calculateGlobalDelta();
 		void FetchCameraPosition(GLfloat &camera_x, GLfloat &camera_y);
+
+private:
+	void FrameTexture();
 
 };
 #endif

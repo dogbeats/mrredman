@@ -69,6 +69,7 @@ int MainGame::run()
 	Render render;
 
 	Shader globalShader = render.CompileShader();
+	Shader screenShader = render.ScreenShader();
 	render.InitialLoad();
 	//KeyPress keyPress;
 
@@ -85,7 +86,7 @@ int MainGame::run()
 		{
 			if (total_delta_time > 0.0) //16.67/1000 60fps
 			{
-				render.Window(window, globalShader);
+				render.Window(window, globalShader, screenShader);
 				glfwGetCursorPos(window, &mouse_x_position, &mouse_y_position);
 				render.FetchCameraPosition(camera_x, camera_y);
 
