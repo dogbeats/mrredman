@@ -63,7 +63,7 @@ GLfloat * Collision::DetectWall(GLfloat player_hitbox_vertices[], glm::vec3 play
 
 	player_position[0] += player_movement_speed;
 
-	for (int k = 0; k < 2; k++)
+	for (int k = 0; k < 1; k++)
 	{
 		GLfloat origin_distance = sqrt(pow(object_position[k][1] - player_position[1] - 0.5f, 2) + pow(object_position[k][0] - player_position[0] - 0.5f, 2));
 		if (origin_distance < 0)
@@ -240,8 +240,8 @@ GLfloat * Collision::DetectWall(GLfloat player_hitbox_vertices[], glm::vec3 play
 							&& (x_intersect >= player_h_x2 && x_intersect <= player_h_x1 && y_intersect >= player_h_y2 && y_intersect <= player_h_y1))
 						{
 
-							if (player_position[0] > hitbox_x2 && player_position[0] < hitbox_x1)
-							{
+							//if (player_position[0] > hitbox_x2 && player_position[0] < hitbox_x1)
+							//{
 								//if (temp_m > 1.0f)
 								//	std::cout << "one\n";
 								//else if (temp_m < -1.0f)
@@ -251,7 +251,7 @@ GLfloat * Collision::DetectWall(GLfloat player_hitbox_vertices[], glm::vec3 play
 		
 								player_collided_line[0] = j;
 								player_collided_line[1] = k;
-								//std::cout << "THIS IS pcl  " << player_collided_line[0] << "\n\n";
+								std::cout << "THIS IS pcl  " << player_collided_line[0] << " : " << player_collided_line[1] << "\n\n";
 								return_values[0] = 0; //can move
 								return_values[1] = temp_m;
 								return_values[2] = temp_c;
@@ -264,12 +264,12 @@ GLfloat * Collision::DetectWall(GLfloat player_hitbox_vertices[], glm::vec3 play
 								//std::cout << "return vaues 0 1 2:    " << return_values[0] << " " << return_values[1] << " " << return_values[2] << " \n";
 
 								return return_values;
-							}
+							//}
 						}
 					}
 				}
 
-				if (j == player_collided_line[0] && k == player_collided_line[1] && (player_position[0] > hitbox_x1 + 0.1f || player_position[0] < hitbox_x2 - 0.1f) && (player_position[1] > hitbox_y1 + 0.1f || player_position[1] < hitbox_y2 - 0.1f)) //k = object, j = line
+				if (j == player_collided_line[0] && k == player_collided_line[1]) //k = object, j = line
 				{
 					//std::cout << "THIS IS J\n\n\n";
 					return_values[0] = -1; //can move
@@ -279,7 +279,7 @@ GLfloat * Collision::DetectWall(GLfloat player_hitbox_vertices[], glm::vec3 play
 					return_values[4] = hitbox_x2;
 					player_collided_line[0] = -2;
 					player_collided_line[1] = -2;
-					std::cout << "hb 1, hb 2 " << hitbox_x1 << " " << hitbox_x2 << " : j,k " << j << " " << k << "\n";
+					std::cout << "hb 1, hb 2 " << hitbox_x1 << " " << hitbox_x2 << " : j,k " << player_position[0] << " " << k << "\n";
 					return return_values;
 				}
 				//std::cout << "ticks to fall: " << ticks_to_fall;
@@ -414,6 +414,7 @@ GLfloat * Collision::LineIntersection(GLfloat hitbox_x1, GLfloat hitbox_y1, GLfl
 		player_h_y1 = player_hitbox_vertices[3 * i + 1] + player_position[1];
 		player_h_y2 = player_hitbox_vertices[3 * i + 4] + player_position[1];*/
 
+
 		if (!is_gradient_inf)
 		{
 			//std::cout << player_h_y1 << " " << hitbox_y1 << " " << player_h_y2 << " " << hitbox_y2 << "\n";
@@ -523,7 +524,7 @@ GLfloat * Collision::DetectCollision(GLfloat player_hitbox_vertices[], glm::vec3
 		if (origin_distance < 0)
 			origin_distance *= -1;
 
-		if (origin_distance < 10.5f)
+		if (origin_distance < 100.5f)
 		{
 			//std::cout << "orig dist: " << origin_distance << " " << k << "\n";
 

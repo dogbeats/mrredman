@@ -34,5 +34,6 @@ public:
 	Object();
 	~Object();
 	void FetchObjectFileData(char* object_names);
+	void Object::DetectObjectMouseCollision(GLfloat mouse_x, GLfloat mouse_y);
 };
 

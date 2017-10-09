@@ -1,5 +1,9 @@
 #include "Render.h"
 
+//TEMPORARY ANIMATION TEST
+GLint water_frame = 0; 
+GLfloat animation_time = 0;
+
 // Quad vertices
 /*GLfloat quadVertices[] = {
 	-10.0f,  10.0f, 1.0f, 1.0f,
@@ -12,13 +16,13 @@
 };*/
 
 GLfloat quadVertices[] = {
-	-1.0f,  1.0f,0.0f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 1.0f,
-	1.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, //0,0 = bottom left
-	1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
+	-1.0f,  1.0f,0.0f, 2.0f, 2.0f, 2.0f, 1.0f,  0.0f, 1.0f,
+	1.0f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, //0,0 = bottom left
+	1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
 				
-	1.0f, -1.0f,  0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-	-1.0f, -1.0f,  0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-	-1.0f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, 1.0f
+	1.0f, -1.0f,  0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+	-1.0f, -1.0f,  0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+	-1.0f,  1.0f, 0.0f, 2.0f, 2.0f, 2.0f, 1.0f,  0.0f, 1.0f
 };
 
 GLuint WIDTH = 800, HEIGHT = 600;
@@ -50,7 +54,9 @@ GLfloat delayTime = 0.0f;
 time_t timet;
 Player player;
 Object object;
-char* file_names[] = { "objects/test_object.txt", "objects/test_object_2.txt", "objects/test_object_building.txt" };//, "objects/test_object_2.txt" };
+char* file_names[] = { "objects/test_object.txt" };// , "objects/test_object_2.txt", "objects/test_object_building.txt" };//, "objects/test_object_2.txt" };
+
+Level level("test", 1);
 
 Render::Render()
 {
@@ -81,7 +87,7 @@ void Render::FrameTexture()
 	glGenTextures(1, &texColorBuffer);
 	glBindTexture(GL_TEXTURE_2D, texColorBuffer);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -92,7 +98,7 @@ void Render::FrameTexture()
 	
 	glGenRenderbuffers(1, &rboDepthStencil);
 	glBindRenderbuffer(GL_RENDERBUFFER, rboDepthStencil);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboDepthStencil);
 
 
@@ -186,14 +192,16 @@ void Render::CallTexture(GLint textureNumber, char* fileName)
 }
 
 //framebuffer
-GLuint vaoQuad;
-GLuint vboQuad;
+GLuint vaoQuad, vaoTest;
+GLuint vboQuad, vboTest;
 
+GLfloat test_for_colour[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 void Render::DrawObj(Shader ourShader, Shader screen_shader, GLFWwindow* window)
 {
 	if (!loadedInitial)
 	{		
+
 		//framebuffer deets
 		glGenVertexArrays(1, &vaoQuad);
 		glGenBuffers(1, &vboQuad);
@@ -257,7 +265,7 @@ void Render::DrawObj(Shader ourShader, Shader screen_shader, GLFWwindow* window)
 
 		char *temp_texture_name[3]; //to change to vector
 
-		for (int i = 0; i < 3; i++)
+		for (int i = 0; i < sizeof(file_names) / sizeof(file_names[0]); i++)
 		{
 			temp_texture_name[i] = new char[texture_name[i].length() + 1];
 			strcpy_s(temp_texture_name[i], texture_name[i].length() + 1, texture_name[i].c_str());
@@ -310,7 +318,35 @@ void Render::DrawObj(Shader ourShader, Shader screen_shader, GLFWwindow* window)
 
 		//text.drawText("ababbaabhello", ourShader, cameraUp, cameraSpeed, deltaTime, fov, cubePositions[0]);
 
+
+		//TEMPORARY ANIMATION CODE - TO DELETE
+		animation_time += deltaTime;
 		//temp_rotate = 2.0f;//+= 1.0f * deltaTime;
+		if (animation_time >= 0.01667 * 20)
+		{
+			glBindVertexArray(VAO);
+			glBindBuffer(GL_ARRAY_BUFFER, VBO);
+			glBufferData(GL_ARRAY_BUFFER, object_data_points.size() * sizeof(object_data_points), &object_data_points.front(), GL_STATIC_DRAW);
+
+			
+			for (int i = 0; i < 2; i++)
+				object_data_points[7 + 9 * i] = 0.0 + 0.1 * water_frame;
+
+			for (int i = 2; i < 5; i++)
+				object_data_points[7 + 9 * i] = 0.1 + 0.1 * water_frame;
+
+			object_data_points[7 + 9 * 5] = 0.0 + 0.1 * water_frame;
+
+			water_frame++;
+			if (water_frame == 6)
+			{
+				water_frame = 0;
+			}
+			animation_time = 0;
+		}
+
+
+
 
 		//framebuffer
 		glEnable(GL_DEPTH_TEST);
@@ -323,7 +359,9 @@ void Render::DrawObj(Shader ourShader, Shader screen_shader, GLFWwindow* window)
 
 		glm::mat4 model[3], model_hitbox[3];
 		glm::vec3 tempPos;
+
 		
+
 		for (int i = 0; i < sizeof(file_names) / sizeof(file_names[0]); i++)
 		{
 			//background

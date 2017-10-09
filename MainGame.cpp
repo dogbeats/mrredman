@@ -78,6 +78,7 @@ int MainGame::run()
 
 	KeyPress keyPress;
 	Player player;
+
 	// Game loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -90,11 +91,12 @@ int MainGame::run()
 				glfwGetCursorPos(window, &mouse_x_position, &mouse_y_position);
 				render.FetchCameraPosition(camera_x, camera_y);
 
-				mouse_x_position = mouse_x_position / 800 + camera_x;
-				mouse_y_position = mouse_y_position / 600 + camera_y;
+				mouse_x_position = mouse_x_position / WIDTH + camera_x - 0.5;
+				mouse_y_position = mouse_y_position / HEIGHT + camera_y - 0.5;
 				//std::cout << "mouse x, y " << mouse_x_position << " " << mouse_y_position << "\n";
 
 				player.PlayerAir(total_delta_time);
+				player.RotateArms(mouse_x_position, mouse_y_position);
 
 				total_delta_time = 0;
 			}

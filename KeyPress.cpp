@@ -20,6 +20,8 @@ void KeyPress::KeyCallback(GLFWwindow* window)
 
 void KeyAssign(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
+	//Change to switch/case system
+
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 	{
 
@@ -85,6 +87,12 @@ void KeyAssign(GLFWwindow* window, int key, int scancode, int action, int mode)
 	if (key == GLFW_KEY_1 && action == GLFW_PRESS)
 	{
 		//render2.ShootLaser(-1);
+	}
+
+	if (key == GLFW_KEY_0 && action == GLFW_PRESS)
+	{
+		std::cout << "fired bullet\n";
+		player2.FireBullet();
 	}
 }
 

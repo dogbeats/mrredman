@@ -2,6 +2,7 @@
 #include "Render.h"
 #include "Collision.h"
 #include "MainGame.h"
+#include "Projectile.h"
 
 class Player
 {
@@ -15,8 +16,11 @@ public:
 	void EndMovement();
 	void StartMovement(GLint key);
 	glm::vec3 GetPlayerPosition();
+	void RotateArms(double mouse_x, double mouse_y);
+	void FireBullet();
 
 private:	
 	void UpdateXVelocity(GLint direction, GLfloat total_delta_time);
+	void UpdatePlayerPosition();
 };
 

@@ -22,6 +22,11 @@ Object::~Object()
 {
 }
 
+void Object::DetectObjectMouseCollision(GLfloat mouse_x, GLfloat mouse_y)
+{
+
+}
+
 void Object::FetchObjectFileData(char* object_names)
 {
 	std::string line;

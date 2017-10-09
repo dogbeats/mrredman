@@ -18,6 +18,7 @@
 #include "KeyPress.h"
 #include "Shader.h"
 #include "Player.h"
+#include "Level.h"
 
 // GLM Mathematics
 #include <glm/glm/glm.hpp>
